@@ -1,4 +1,5 @@
 import { AppDataSource } from "./data-source";
+import { Note } from "./entity/Note";
 import { User } from "./entity/User";
 import * as express from "express";
 
@@ -7,7 +8,14 @@ const run = async () => {
     const app = express();
     app.use(express.json());
     app.get("/users", async (req, res) => {
-        const users = await AppDataSource.manager.getRepository(User).find();
+        const users = await AppDataSource.manager.getRepository(User).find({
+            relations: ['notes'],
+            order: {
+                notes: {
+                    createdAt: 'DESC', // Order posts by createdAt in descending order
+                },
+            },
+        });
         res.json(users);
     });
     app.post("/users", async (req, res) => {
@@ -30,6 +38,17 @@ const run = async () => {
         await AppDataSource.manager.getRepository(User).save(user);
         res.json(user);
     });
+
+    //note routes
+    app.post("/notes", async (req, res) => {
+        const note = new Note();
+        note.userId = req.body.userId;
+        note.noteText = req.body.noteText;
+        await AppDataSource.manager.getRepository(Note).save(note);
+        res.json(note);
+    });
+
+
     app.listen(3000, () => {
         console.log("Server is running on http://localhost:3000");
     });
