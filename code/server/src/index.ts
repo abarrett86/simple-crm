@@ -29,6 +29,7 @@ const run = async () => {
         const users = await AppDataSource.manager.getRepository(User).find({
             relations: ['notes'],
             order: {
+                id: 'ASC',
                 notes: {
                     createdAt: 'ASC', // Order posts by createdAt in descending order
                 },
