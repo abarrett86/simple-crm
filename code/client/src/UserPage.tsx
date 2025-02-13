@@ -25,11 +25,20 @@ export const UserPage: React.FC = () => {
   
 
   const handleNavigation = () => {
-    if (location.key === 'default') { //if the previous route is the users page, navigate to maintain good history
-        navigate('/'); 
-      } else {
-        navigate(-1);
-      }
+    
+    // check if navigating within the app
+    const isWithinApp = location.pathname.startsWith('/');
+
+    if (isWithinApp) {
+        // navigate to the home route from a tab
+        if (location.key === 'default') {
+            navigate('/');
+        } else {
+            navigate(-1); 
+        }
+    } else { 
+        navigate('/');
+    }
   };
 
     return (
