@@ -7,12 +7,30 @@ const run = async () => {
     await AppDataSource.initialize();
     const app = express();
     app.use(express.json());
+
+    app.get("/users/:id", async (req, res) => {
+
+        const user = await AppDataSource.manager
+        .getRepository(User)
+        .findOne({ 
+            where: { id: req.params.id },
+            relations: ['notes'],
+            order: {
+                notes: {
+                    createdAt: 'ASC', // Order posts by createdAt in descending order
+                },
+            },
+        });
+        
+        res.json(user);
+    });
+    
     app.get("/users", async (req, res) => {
         const users = await AppDataSource.manager.getRepository(User).find({
             relations: ['notes'],
             order: {
                 notes: {
-                    createdAt: 'DESC', // Order posts by createdAt in descending order
+                    createdAt: 'ASC', // Order posts by createdAt in descending order
                 },
             },
         });

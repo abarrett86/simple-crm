@@ -1,14 +1,17 @@
+import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { AddUser } from "./add-user";
 import { Users } from "./users";
+import { UserPage } from "./UserPage";
 
-export const App: React.FC = () => {
-    return (
+export const App: React.FC = () => (
+    <Router>
         <div className="p-4 space-y-8">
-            <h1 className="text-xl">SimpleCrm</h1>
-            <Users />
-            <AddUser />
+            <Routes>
+                <Route index element={<Users />} />
+                <Route path="/users/:id" element={<UserPage />} />
+            </Routes>
         </div>
-    );
-};
+    </Router>
+);
 
 export default App;

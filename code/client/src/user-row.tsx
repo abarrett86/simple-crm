@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "./types";
 import axios from "axios";
+import { getFormattedDatetime } from "./getFormattedDatetime";
+import { getFormattedPhone } from "./getFormattedPhone";
+import { useNavigate } from 'react-router-dom';
 
 export const UserRow: React.FC<{ user: User }> = ({ user }) => {
+    const navigate = useNavigate();
+
     const [isEditing, setIsEditing] = useState(false);
     const [firstName, setFirstName] = useState(user.firstName);
     const [lastName, setLastName] = useState(user.lastName);
@@ -16,6 +21,22 @@ export const UserRow: React.FC<{ user: User }> = ({ user }) => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if (event.key === 'Escape') {
+            //hide the add note modal on esc key
+            setIsAddingNote(false);
+          }
+        };
+    
+        window.addEventListener('keydown', handleKeyDown);
+    
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+        };
+      }, []);
 
     const handleSubmitEdit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,6 +80,7 @@ export const UserRow: React.FC<{ user: User }> = ({ user }) => {
         }
         setLoading(false);
     };
+    
 
     const onEdit = () => {
         setIsAddingNote(false);
@@ -70,13 +92,11 @@ export const UserRow: React.FC<{ user: User }> = ({ user }) => {
         setIsEditing(false);
     }
 
-    const getFormattedDatetime = (dateTime:Date) => {
-        const date = new Date(dateTime);
-        return `${date.toLocaleDateString()} ${date.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-              })}`;
+    const onView = () => {
+        navigate(`/users/${user.id}`);
     }
+
+    
 
     if (isEditing) {
         return (
@@ -136,11 +156,13 @@ export const UserRow: React.FC<{ user: User }> = ({ user }) => {
         <tr key={user.id} className="border-b border-gray-200">
             <td>
                 <button className=" p-2 bg-blue-500 text-white rounded mr-2" onClick={onEdit}>Edit</button>
-                <button className=" p-2 bg-blue-500 text-white rounded" onClick={() => onAddNote()}>Add Note</button>
+                <a href="#" className=" p-2 underline cursor-pointer mr-2" onClick={(e) => {e.preventDefault(); onAddNote();}}>Add Note</a>
+                <a href="#" className=" p-2 underline cursor-pointer" onClick={(e) => {e.preventDefault(); onView();}}>View</a>
+
                 { isAddingNote && 
                     (
                         <div 
-                        className="absolute inset-0 bg-gray-900 bg-opacity-50 text-white flex items-center justify-center"
+                        className="fixed inset-0 bg-gray-900 bg-opacity-50 text-white flex items-center justify-center"
                         onClick={() => setIsAddingNote(false)}
                         >
                             <div
@@ -151,7 +173,7 @@ export const UserRow: React.FC<{ user: User }> = ({ user }) => {
                                     className="space-y-4 p-4 rounded bg-gray-100 w-96 text-black">
                                         <h2 className="text-xl">Add Note to {firstName} {lastName}</h2>
                                     <textarea
-                                        className="w-full"
+                                        className="w-full p-2"
                                         value={newNoteText}
                                         placeholder="Enter Note"
                                         onChange={e => setNewNoteText(e.target.value)}
@@ -174,7 +196,7 @@ export const UserRow: React.FC<{ user: User }> = ({ user }) => {
             <td>{firstName}</td>
             <td>{lastName}</td>
             <td>{age}</td>
-            <td>{phoneNumber}</td>
+            <td>{getFormattedPhone(phoneNumber)}</td>
             <td>
                 
                 {user.notes.map((note, noteIndex) => (
